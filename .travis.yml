@@ -6,6 +6,7 @@ addons:
     update: true
     packages:
       - desktop-file-utils
+      - libfuse-dev
 
 script:
   - bash -xe travis/travis-build.sh
