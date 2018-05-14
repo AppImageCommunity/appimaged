@@ -27,7 +27,7 @@ systemctl --user add-wants default.target appimaged
 systemctl --user start appimaged
 ```
 
-# Monitored directories
+## Monitored directories
 
 appimaged will register the AppImages in with your system from the following places:
 
@@ -44,7 +44,7 @@ appimaged will register the AppImages in with your system from the following pla
 * /usr/local/bin
 
 
-# Usage
+## Usage
 
 ```
 Usage:
@@ -65,7 +65,7 @@ Run `appimaged -v` for increased verbosity.
 __NOTE:__ It may be necessary to restart (or `xkill`) dash, nautilus, to recognize new directories that didn't exist prior to the first run of `appimaged`. Alternatively, it should be sufficient to log out of the session and log in again after having run appimaged once.
 
 
-# Use AppImageUpdate with appimaged
+## Use AppImageUpdate with appimaged
 
 If you have `AppImageUpdate` on your `$PATH`, then it can also do this neat trick:
 
