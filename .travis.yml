@@ -1,6 +1,12 @@
 language: cpp
 sudo: required
 
+addons:
+  apt:
+    update: true
+    packages:
+      - desktop-file-utils
+
 script:
   - bash -xe travis/travis-build.sh
 
