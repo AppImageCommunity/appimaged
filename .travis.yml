@@ -8,6 +8,9 @@ addons:
       - desktop-file-utils
       - libfuse-dev
 
+install:
+  - wget https://cmake.org/files/v3.11/cmake-3.11.1-Linux-x86_64.tar.gz -qO- | sudo tar -xz --strip-components=1 -C /usr
+
 script:
   - bash -xe travis/travis-build.sh
 
