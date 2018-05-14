@@ -2,11 +2,14 @@
 cmake_minimum_required(VERSION 3.6)
 
 
+# FIXME: why are these lines necessary? The
+include_directories(${inotify-tools_INCLUDE_DIRS})
+include_directories(${libglib_INCLUDE_DIRS})
+
+
 add_executable(appimaged main.c)
 
-import_pkgconfig_target(libglib2 glib-2.0>=2.40)
-
-target_link_libraries(appimaged PRIVATE libappimage xdg-basedir inotify-tools)
+target_link_libraries(appimaged PRIVATE libappimage inotify-tools xdg-basedir)
 
 
 install(
