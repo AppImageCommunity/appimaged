@@ -61,3 +61,6 @@ add_subdirectory(resources)
 
 # include source dir
 add_subdirectory(src)
+
+# include packaging configuration
+include(cmake/cpack_debs.cmake)
