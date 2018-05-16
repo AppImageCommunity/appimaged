@@ -77,3 +77,19 @@ Download AppImageUpdate from https://github.com/AppImage/AppImageUpdate/releases
 sudo mv "Downloads/AppImageUpdate-*.AppImage" /usr/local/bin/AppImageUpdate
 chmod a+x /usr/local/bin/AppImageUpdate
 ```
+
+
+## Build
+
+appimaged is built using CMake.
+
+You can build appimaged as follows:
+
+```
+git clone --recursive https://github.com/AppImage/appimaged/
+cd appimaged/
+mkdir build/
+cd build/
+cmake ..
+make
+```
