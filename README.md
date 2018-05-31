@@ -38,6 +38,7 @@ appimaged will register the AppImages in with your system from the following pla
 * /Applications
 * /isodevice/Applications
 * /isofrom/Applications
+* /run/initramfs/isoscan/Applications
 * /run/archiso/img_dev/Applications
 * /lib/live/mount/findiso/Applications
 * /opt

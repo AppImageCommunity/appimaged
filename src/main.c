@@ -330,7 +330,8 @@ int main(int argc, char ** argv) {
     // Perhaps we should determine the following dynamically using something like
     // mount | grep -i iso | head -n 1 | cut -d ' ' -f 3
     add_dir_to_watch(g_build_filename("/isodevice/Applications", NULL)); // Ubuntu Live media
-    add_dir_to_watch(g_build_filename("/isofrom/Applications", NULL)); // openSUSE Live media
+    add_dir_to_watch(g_build_filename("/isofrom/Applications", NULL)); // Older openSUSE Live media
+    add_dir_to_watch(g_build_filename("/run/initramfs/isoscan/Applications", NULL)); // Newer openSUSE Live media
     add_dir_to_watch(g_build_filename("/run/archiso/img_dev/Applications", NULL)); // Antergos Live media
     add_dir_to_watch(g_build_filename("/lib/live/mount/findiso/Applications", NULL)); // Manjaro Live media
     add_dir_to_watch(g_build_filename("/opt", NULL));
