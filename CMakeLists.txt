@@ -46,10 +46,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # include external dependencies
 add_subdirectory(lib)
 
-# set rpath to make sure libraries are found
-# the RPATH to be used when installing
-set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib/appimaged")
-
 # include resources
 add_subdirectory(resources)
 
