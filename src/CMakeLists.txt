@@ -9,7 +9,7 @@ include_directories(${libglib_INCLUDE_DIRS})
 
 add_executable(appimaged main.c)
 
-target_link_libraries(appimaged PRIVATE libappimage_static inotify-tools xdg-basedir)
+target_link_libraries(appimaged PRIVATE libappimage_static inotify-tools xdg-basedir dl)
 
 
 install(
