@@ -21,7 +21,7 @@ Usage in a nutshell:
 Or, if you are on a deb-based system:
 
 ```
-wget -c "https://github.com/AppImage/appimaged/releases/download/continuous/appimaged_1.0_amd64.deb"
+# Download the .deb file from https://github.com/AppImage/appimaged/releases
 sudo dpkg -i appimaged_*.deb
 systemctl --user add-wants default.target appimaged
 systemctl --user start appimaged
