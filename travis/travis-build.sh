@@ -45,6 +45,6 @@ mv squashfs-root/ linuxdeployqt/
 linuxdeployqt/AppRun appdir/usr/share/applications/appimaged.desktop -bundle-non-qt-libs
 
 export PATH=linuxdeployqt/usr/bin/:"$PATH"
-appimagetool appdir/ -u "gh-releases-zsync|AppImage|appimaged|appimaged*x86_64*.AppImage.zsync"
+appimagetool appdir/ -u "gh-releases-zsync|AppImage|appimaged|continuous|appimaged*x86_64*.AppImage.zsync"
 
 mv appimaged*.{AppImage,deb}* "$OLD_CWD/"
