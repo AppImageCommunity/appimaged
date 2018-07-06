@@ -3,12 +3,7 @@
 set -x
 set -e
 
-# use RAM disk if possible
-if [ -d /dev/shm ]; then
-    TEMP_BASE=/dev/shm
-else
     TEMP_BASE=/tmp
-fi
 
 BUILD_DIR=$(mktemp -d -p "$TEMP_BASE" AppImageUpdate-build-XXXXXX)
 
@@ -37,14 +32,12 @@ cpack -V -G DEB
 mkdir -p appdir
 make install DESTDIR=appdir
 
-wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
-chmod +x linuxdeployqt-continuous-x86_64.AppImage
-./linuxdeployqt-continuous-x86_64.AppImage --appimage-extract
-mv squashfs-root/ linuxdeployqt/
+wget https://github.com/TheAssassin/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+chmod +x linuxdeploy-x86_64.AppImage
+./linuxdeploy-x86_64.AppImage --appimage-extract
+mv squashfs-root/ linuxdeploy/
 
-linuxdeployqt/AppRun appdir/usr/share/applications/appimaged.desktop -bundle-non-qt-libs
-
-export PATH=linuxdeployqt/usr/bin/:"$PATH"
-appimagetool appdir/ -u "gh-releases-zsync|AppImage|appimaged|continuous|appimaged*x86_64*.AppImage.zsync"
+export UPDATE_INFORMATION="gh-releases-zsync|AppImage|appimaged|continuous|appimaged*x86_64*.AppImage.zsync"
+linuxdeploy/AppRun --appdir appdir --output appimage
 
 mv appimaged*.{AppImage,deb}* "$OLD_CWD/"
