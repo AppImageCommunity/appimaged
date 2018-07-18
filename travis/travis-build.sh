@@ -30,7 +30,11 @@ pushd "$BUILD_DIR"
 #
 #export PATH="$BUILD_DIR"/bin:"$PATH"
 
-cmake "$REPO_ROOT" -DCMAKE_INSTALL_PREFIX=/usr
+if [ "$ARCH" == "i386" ]; then
+    export EXTRA_CMAKE_ARGS=("-DCMAKE_TOOLCHAIN_FILE=$REPO_ROOT/cmake/toolchains/i386-linux-gnu.cmake")
+fi
+
+cmake "$REPO_ROOT" -DCMAKE_INSTALL_PREFIX=/usr "${EXTRA_CMAKE_ARGS[@]}"
 
 make -j$(nproc)
 

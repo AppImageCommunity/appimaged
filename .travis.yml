@@ -3,7 +3,7 @@ sudo: required
 
 matrix:
   include:
-    - env: BIONIC= ARCH=x86_64
+    - env: ARCH=x86_64
       addons:
         apt:
           update: true
@@ -14,7 +14,7 @@ matrix:
             - ccache
             - libcurl3
             - libbsd-dev
-    - env: BIONIC= ARCH=i386
+    - env: ARCH=i386
       addons:
         apt:
           update: true
