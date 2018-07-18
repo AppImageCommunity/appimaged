@@ -3,9 +3,9 @@
 set -x
 set -e
 
-    TEMP_BASE=/tmp
+TEMP_BASE=/tmp
 
-BUILD_DIR=$(mktemp -d -p "$TEMP_BASE" AppImageUpdate-build-XXXXXX)
+BUILD_DIR=$(mktemp -d -p "$TEMP_BASE" appimaged-build-XXXXXX)
 
 cleanup () {
     if [ -d "$BUILD_DIR" ]; then
@@ -21,6 +21,15 @@ OLD_CWD=$(readlink -f .)
 
 pushd "$BUILD_DIR"
 
+## build up-to-date version of CMake
+#wget https://cmake.org/files/v3.12/cmake-3.12.0.tar.gz -O- | tar xz
+#pushd cmake-*/
+#./configure --prefix="$BUILD_DIR"/bin
+#make install -j$(nproc)
+#popd
+#
+#export PATH="$BUILD_DIR"/bin:"$PATH"
+
 cmake "$REPO_ROOT" -DCMAKE_INSTALL_PREFIX=/usr
 
 make -j$(nproc)
@@ -32,12 +41,12 @@ cpack -V -G DEB
 mkdir -p appdir
 make install DESTDIR=appdir
 
-wget https://github.com/TheAssassin/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-chmod +x linuxdeploy-x86_64.AppImage
-./linuxdeploy-x86_64.AppImage --appimage-extract
+wget https://github.com/TheAssassin/linuxdeploy/releases/download/continuous/linuxdeploy-"$ARCH".AppImage
+chmod +x linuxdeploy-"$ARCH".AppImage
+./linuxdeploy-"$ARCH".AppImage --appimage-extract
 mv squashfs-root/ linuxdeploy/
 
-export UPDATE_INFORMATION="gh-releases-zsync|AppImage|appimaged|continuous|appimaged*x86_64*.AppImage.zsync"
+export UPDATE_INFORMATION="gh-releases-zsync|AppImage|appimaged|continuous|appimaged*$ARCH*.AppImage.zsync"
 linuxdeploy/AppRun --appdir appdir --output appimage
 
 mv appimaged*.{AppImage,deb}* "$OLD_CWD/"

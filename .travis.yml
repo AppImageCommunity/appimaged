@@ -1,16 +1,35 @@
 language: cpp
 sudo: required
 
-addons:
-  apt:
-    update: true
-    packages:
-      - desktop-file-utils
-      - libfuse-dev
-
-install:
-  - wget https://cmake.org/files/v3.11/cmake-3.11.1-Linux-x86_64.tar.gz -O- | sudo tar -xz --strip-components=1 -C /usr
-
+matrix:
+  include:
+- env: BIONIC= ARCH=x86_64
+      addons:
+        apt:
+          update: true
+          packages:
+            - librsvg2-bin
+            - libfuse-dev
+            - desktop-file-utils
+            - ccache
+            - libcurl3
+            - libbsd-dev
+    - env: BIONIC= ARCH=i386
+      addons:
+        apt:
+          update: true
+          packages:
+            - gcc-multilib
+            - g++-multilib
+            - libfuse2:i386
+            - librsvg2-bin:i386
+            - libfuse-dev:i386
+            - desktop-file-utils
+            - ccache
+            - libbsd-dev:i386
+            - libglib2.0-dev:i386
+            - liblzma-dev:i386
+            - libgtest-dev
 script:
   - bash -xe travis/travis-build.sh
 
