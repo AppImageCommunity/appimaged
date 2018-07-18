@@ -14,6 +14,7 @@ matrix:
             - ccache
             - libcurl3
             - libbsd-dev
+            - libcairo-dev
     - env: ARCH=i386
       addons:
         apt:
@@ -30,6 +31,7 @@ matrix:
             - libglib2.0-dev:i386
             - liblzma-dev:i386
             - libgtest-dev
+            - libcairo-dev:i386
 
 script:
   - bash -xe travis/travis-build.sh
