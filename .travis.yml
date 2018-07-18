@@ -3,7 +3,7 @@ sudo: required
 
 matrix:
   include:
-- env: BIONIC= ARCH=x86_64
+    - env: BIONIC= ARCH=x86_64
       addons:
         apt:
           update: true
@@ -30,6 +30,7 @@ matrix:
             - libglib2.0-dev:i386
             - liblzma-dev:i386
             - libgtest-dev
+
 script:
   - bash -xe travis/travis-build.sh
 
