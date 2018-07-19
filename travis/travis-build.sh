@@ -3,6 +3,11 @@
 set -x
 set -e
 
+if [ "$ARCH" == "" ]; then
+    echo "Error: \$ARCH not set"
+    exit 1
+fi
+
 TEMP_BASE=/tmp
 
 BUILD_DIR=$(mktemp -d -p "$TEMP_BASE" appimaged-build-XXXXXX)
@@ -18,6 +23,15 @@ trap cleanup EXIT
 # store repo root as variable
 REPO_ROOT=$(readlink -f $(dirname $(dirname $0)))
 OLD_CWD=$(readlink -f .)
+
+if [ "$CI" != "" ] && [ "$KEY" != "" ]; then
+    # clean up and download data from GitHub
+    wget https://github.com/AppImage/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
+    set +x ; echo "$KEY" | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg || true
+    tar xf data.tar.gz
+    chown -R "$USER" .gnu*
+    export GNUPGHOME=$(readlink -f .gnu*)
+fi
 
 pushd "$BUILD_DIR"
 
@@ -45,12 +59,16 @@ cpack -V -G DEB
 mkdir -p appdir
 make install DESTDIR=appdir
 
-wget https://github.com/TheAssassin/linuxdeploy/releases/download/continuous/linuxdeploy-"$ARCH".AppImage
+wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-"$ARCH".AppImage
 chmod +x linuxdeploy-"$ARCH".AppImage
 ./linuxdeploy-"$ARCH".AppImage --appimage-extract
 mv squashfs-root/ linuxdeploy/
+wget https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-"$ARCH".AppImage
+
+linuxdeploy/AppRun --list-plugins
 
 export UPDATE_INFORMATION="gh-releases-zsync|AppImage|appimaged|continuous|appimaged*$ARCH*.AppImage.zsync"
+export SIGN=1
 linuxdeploy/AppRun --appdir appdir --output appimage
 
 mv appimaged*.{AppImage,deb}* "$OLD_CWD/"
