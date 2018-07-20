@@ -65,7 +65,6 @@ wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/lin
 chmod +x linuxdeploy-"$ARCH".AppImage
 ./linuxdeploy-"$ARCH".AppImage --appimage-extract
 mv squashfs-root/ linuxdeploy/
-wget https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-"$ARCH".AppImage
 
 linuxdeploy/AppRun --list-plugins
 
