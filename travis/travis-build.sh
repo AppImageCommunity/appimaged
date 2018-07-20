@@ -71,6 +71,7 @@ linuxdeploy/AppRun --list-plugins
 
 export UPDATE_INFORMATION="gh-releases-zsync|AppImage|appimaged|continuous|appimaged*$ARCH*.AppImage.zsync"
 export SIGN=1
+export VERBOSE=1
 linuxdeploy/AppRun --appdir appdir --output appimage
 
 mv appimaged*.{AppImage,deb}* "$OLD_CWD/"
