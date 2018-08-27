@@ -31,7 +31,10 @@ matrix:
             - libglib2.0-dev:i386
             - liblzma-dev:i386
             - libgtest-dev
-            - libcairo-dev:i386
+            - libcairo2-dev:i386
+            - libpng-dev:i386
+            - libfreetype6-dev:i386
+            - libfontconfig1-dev:i386
 
 script:
   - bash -xe travis/travis-build.sh
