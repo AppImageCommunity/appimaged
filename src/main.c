@@ -56,6 +56,8 @@
 #include <appimage/appimage.h>
 #include <xdg-basedir.h>
 
+#include "notify.h"
+
 #ifndef RELEASE_NAME
 #define RELEASE_NAME "continuous build"
 #endif
