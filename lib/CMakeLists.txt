@@ -33,5 +33,3 @@ else()
 
     import_find_pkg_target(inotify-tools INotify INOTIFYTOOLS)
 endif()
-
-import_pkgconfig_target(TARGET_NAME libnotify PKGCONFIG_TARGET libnotify)
