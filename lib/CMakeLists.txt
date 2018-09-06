@@ -16,7 +16,7 @@ if(NOT USE_SYSTEM_INOTIFY_TOOLS)
         PATCH_COMMAND ${WGET} -N --content-disposition "https://raw.githubusercontent.com/AppImage/external-resources/master/patches/config.guess"
         COMMAND ${WGET} -N --content-disposition "https://raw.githubusercontent.com/AppImage/external-resources/master/patches/config.sub"
         UPDATE_COMMAND ""  # ${MAKE} sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
-        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} <SOURCE_DIR>/configure --enable-shared --enable-static --enable-doxygen=no --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib ${EXTRA_CONFIGURE_FLAGS}
+        CONFIGURE_COMMAND CC=${CC} CXX=${DEPENDENCIES_CXX} CFLAGS=${DEPENDENCIES_CFLAGS} LDFLAGS=${LDFLAGS} <SOURCE_DIR>/configure --enable-shared --enable-static --enable-doxygen=no --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib ${EXTRA_CONFIGURE_FLAGS}
         BUILD_COMMAND ${MAKE}
         BUILD_IN_SOURCE ON
         INSTALL_COMMAND ${MAKE} install
