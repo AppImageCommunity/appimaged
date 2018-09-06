@@ -48,6 +48,8 @@
 #include <inotifytools/inotifytools.h>
 #include <inotifytools/inotify.h>
 
+#include <libnotify/notify.h>
+
 #include <glib.h>
 #include <glib/gprintf.h>
 
@@ -59,8 +61,6 @@
 #ifndef RELEASE_NAME
 #define RELEASE_NAME "continuous build"
 #endif
-
-extern int notify(char *title, char *body, int timeout);
 
 static gboolean verbose = FALSE;
 static gboolean showVersionOnly = FALSE;

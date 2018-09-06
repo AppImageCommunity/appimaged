@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.0)
 
 project(appimaged)
 
+# include own FindXXXX scripts
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 # determine Git commit ID
 execute_process(
     COMMAND git rev-parse --short HEAD
