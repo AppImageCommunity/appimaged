@@ -48,8 +48,6 @@
 #include <inotifytools/inotifytools.h>
 #include <inotifytools/inotify.h>
 
-#include <libnotify/notify.h>
-
 #include <glib.h>
 #include <glib/gprintf.h>
 
