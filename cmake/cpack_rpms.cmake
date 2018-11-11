@@ -11,6 +11,9 @@ if(DEFINED ENV{ARCH})
     endif()
 endif()
 
+# override default package naming
+set(CPACK_RPM_FILE_NAME RPM-DEFAULT)
+
 # versioning
 set(CPACK_PACKAGE_VERSION ${APPIMAGED_VERSION})
 
