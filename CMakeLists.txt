@@ -58,3 +58,5 @@ add_subdirectory(src)
 # include packaging configuration
 include(cmake/cpack_debs.cmake)
 include(cmake/cpack_rpms.cmake)
+# CPack must be included once only, after setting all the variables
+include(CPack)

@@ -45,8 +45,3 @@ set(CPACK_RPM_PACKAGE_REQUIRES "libarchive13, libc6 >= 2.4, libglib2.0-0, zlib1g
 
 set(CPACK_COMPONENTS_ALL appimaged)
 set(CPACK_RPM_COMPONENT_INSTALL ON)
-
-include(CPack)
-
-# The issue I have with CMake is that everything is implicit and hidden behind variables.
-# Where does the RPM get generated? Does it get generated at all?
