@@ -41,5 +41,3 @@ set(CPACK_DEBIAN_APPIMAGED_PACKAGE_DEPENDS "libarchive13, libc6 (>= 2.4), libgli
 
 set(CPACK_COMPONENTS_ALL appimaged)
 set(CPACK_DEB_COMPONENT_INSTALL ON)
-
-include(CPack)

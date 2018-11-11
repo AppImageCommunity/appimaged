@@ -15,6 +15,7 @@ matrix:
             - libcurl3
             - libbsd-dev
             - libcairo-dev
+            - rpm
     - env: ARCH=i386
       addons:
         apt:
@@ -35,6 +36,7 @@ matrix:
             - libpng-dev:i386
             - libfreetype6-dev:i386
             - libfontconfig1-dev:i386
+            - rpm
 
 script:
   - bash -xe travis/travis-build.sh
@@ -42,7 +44,7 @@ script:
 after_success:
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - if [ "$TRAVIS_BRANCH" != "master" ]; then export TRAVIS_EVENT_TYPE=pull_request; fi
-  - bash upload.sh appimaged*.AppImage* appimaged*.deb*
+  - bash upload.sh appimaged*.AppImage* appimaged*.deb* appimaged*.rpm*
 
 branches:
   except:

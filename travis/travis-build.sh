@@ -57,6 +57,9 @@ make -j$(nproc)
 # make .deb
 cpack -V -G DEB
 
+# make .rpm
+cpack -V -G RPM
+
 # make AppImages
 mkdir -p appdir
 make install DESTDIR=appdir
@@ -73,4 +76,4 @@ export SIGN=1
 export VERBOSE=1
 linuxdeploy/AppRun --appdir appdir --output appimage
 
-mv appimaged*.{AppImage,deb}* "$OLD_CWD/"
+mv appimaged*.{AppImage,deb,rpm}* "$OLD_CWD/"
