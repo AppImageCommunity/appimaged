@@ -31,7 +31,7 @@ set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 
 set(CPACK_RPM_PACKAGE_NAME "appimaged")
 set(CPACK_RPM_PACKAGE_SUMMARY
-    "Optional AppImage daemon for desktop integration.\n  Integrates AppImages into the desktop, e.g., installs icons and menu entries.")
+    "Optional AppImage daemon for desktop integration. Integrates AppImages into the desktop, e.g., installs icons and menu entries.")
 
 set(CPACK_RPM_PACKAGE_REQUIRES "libarchive13, libc6 >= 2.4, libglib2.0-0, zlib1g, fuse")
 
