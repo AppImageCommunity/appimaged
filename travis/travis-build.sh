@@ -57,6 +57,9 @@ make -j$(nproc)
 # make .deb
 cpack -V -G DEB
 
+# make .rpm
+cpack -V -G RPM
+
 # make AppImages
 mkdir -p appdir
 make install DESTDIR=appdir
