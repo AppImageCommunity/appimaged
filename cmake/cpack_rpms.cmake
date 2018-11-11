@@ -1,7 +1,15 @@
 # required for DEB-DEFAULT to work as intended
 cmake_minimum_required(VERSION 3.6)
 
-set(CPACK_GENERATOR "RPM")
+# allow building RPM packages on non-RPM systems
+if(DEFINED ENV{ARCH})
+    set(CPACK_RPM_PACKAGE_ARCHITECTURE $ENV{ARCH})
+    if(CPACK_RPM_PACKAGE_ARCHITECTURE MATCHES "i686")
+        set(CPACK_RPM_PACKAGE_ARCHITECTURE "i386")
+    elseif(CPACK_RPM_PACKAGE_ARCHITECTURE MATCHES "amd64")
+        set(CPACK_RPM_PACKAGE_ARCHITECTURE "x86_64")
+    endif()
+endif()
 
 # versioning
 set(CPACK_PACKAGE_VERSION ${APPIMAGED_VERSION})
