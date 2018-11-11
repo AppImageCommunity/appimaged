@@ -76,4 +76,4 @@ export SIGN=1
 export VERBOSE=1
 linuxdeploy/AppRun --appdir appdir --output appimage
 
-mv appimaged*.{AppImage,deb}* "$OLD_CWD/"
+mv appimaged*.{AppImage,deb,rpm}* "$OLD_CWD/"
