@@ -113,7 +113,7 @@ struct arg_struct {
 
 void update_desktop()
 {
-    const gchar *error_msgfmt = "Warning: failed to spawn %s:\n";
+    const gchar *error_msgfmt = "Warning: %s retuned non-zero exit code:\n";
     if(is_update_desktop_available && system(cmd_update_desktop) != 0) {
         THREADSAFE_G_PRINT(error_msgfmt, program_update_desktop);
     }
