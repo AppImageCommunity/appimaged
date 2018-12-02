@@ -67,6 +67,20 @@ static gboolean showVersionOnly = FALSE;
 static gboolean install = FALSE;
 static gboolean uninstall = FALSE;
 static gboolean no_install = FALSE;
+static GMutex print_mutex;
+static GMutex time_mutex;
+static const gint64 time_update_interval = 3 * 1000000; // 3 seconds (in microseconds)
+static gint64 time_last_change = 0; // in microseconds
+static gint64 time_last_update = 0; // in microseconds
+static const gchar *program_update_desktop = "update-desktop-database";
+static const gchar *program_update_mime = "update-mime-database";
+static const gchar *program_gtk_update_icon_cache = "gtk-update-icon-cache";
+static const gchar *cmd_update_desktop = "update-desktop-database ~/.local/share/applications/";
+static const gchar *cmd_update_mime = "update-mime-database ~/.local/share/mime/";
+static const gchar *cmd_gtk_update_icon_cache = "gtk-update-icon-cache ~/.local/share/icons/hicolor/ -t";
+static gboolean is_update_desktop_available = FALSE;
+static gboolean is_update_mime_available = FALSE;
+static gboolean is_gtk_update_icon_cache_available = FALSE;
 gchar **remaining_args = NULL;
 
 static GOptionEntry entries[] =
@@ -83,6 +97,12 @@ static GOptionEntry entries[] =
 #define EXCLUDE_CHUNK 1024
 #define WR_EVENTS (IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF)
 
+// to ensure we don't garble stdout, we have to use this in the threads
+#define THREADSAFE_G_PRINT(str, ...) \
+    g_mutex_lock(&print_mutex);\
+    g_print(str, ##__VA_ARGS__); \
+    g_mutex_unlock(&print_mutex)
+
 /* Run the actual work in treads;
  * pthread allows to pass only one argument to the thread function,
  * hence we use a struct as the argument in which the real arguments are */
@@ -91,10 +111,38 @@ struct arg_struct {
     gboolean verbose;
 };
 
+void update_desktop()
+{
+    const gchar *error_msgfmt = "Warning: failed to spawn %s:\n";
+    if(is_update_desktop_available && system(cmd_update_desktop) != 0) {
+        THREADSAFE_G_PRINT(error_msgfmt, program_update_desktop);
+    }
+    if(is_update_mime_available && system(cmd_update_mime) != 0) {
+        THREADSAFE_G_PRINT(error_msgfmt, program_update_mime);
+    }
+    if(is_gtk_update_icon_cache_available && system(cmd_gtk_update_icon_cache) != 0) {
+        THREADSAFE_G_PRINT(error_msgfmt, program_gtk_update_icon_cache);
+    }
+}
+
+void update_desktop_set_dirty()
+{
+    gint64 time = g_get_real_time();
+    g_mutex_lock(&time_mutex);
+    time_last_change = time;
+    // this is very unlikely to happen, but theoretically possible due to
+    // timer precision. in such an unlikely case we want to just run the update again.
+    if(time_last_change == time_last_update) {
+        time_last_change++;
+    }
+    g_mutex_unlock(&time_mutex);
+}
+
 void *thread_appimage_register_in_system(void *arguments)
 {
     struct arg_struct *args = arguments;
     appimage_register_in_system(args->path, args->verbose);
+    update_desktop_set_dirty();
     pthread_exit(NULL);
 }
 
@@ -102,7 +150,59 @@ void *thread_appimage_unregister_in_system(void *arguments)
 {
     struct arg_struct *args = arguments;
     appimage_unregister_in_system(args->path, args->verbose);
+    update_desktop_set_dirty();
     pthread_exit(NULL);
+}
+
+// thread which checks if an update of the desktop is necessary and updates it accordingly.
+void *thread_update_desktop()
+{
+    while(TRUE) {
+        gboolean do_update = FALSE;
+        
+        // update only after a specific interval (time_update_interval) has passed since the last change.
+        // the lock is here to ensure that the desktop is never in an inconsistent state.
+        g_mutex_lock(&time_mutex);
+        if(time_last_change != time_last_update && g_get_real_time() > time_last_change + time_update_interval) {
+            time_last_update = g_get_real_time();
+            time_last_change = time_last_update;
+            do_update = TRUE;
+        }
+        g_mutex_unlock(&time_mutex);
+        
+        if(do_update) {
+            THREADSAFE_G_PRINT("Updating desktop...\n");
+            gint64 update_start = g_get_real_time();
+            update_desktop();
+            gint64 update_end = g_get_real_time();
+            THREADSAFE_G_PRINT("Finished updating desktop in %ld milliseconds.\n", (update_end - update_start) / 1000);
+        }
+        
+        // sleep one second
+        g_usleep(1000000);
+    }
+}
+
+// check the availability of a single program in the $PATH.
+gboolean check_for_program(const gchar *program_name)
+{
+    gboolean result = FALSE;
+    
+    gchar *tmp = g_find_program_in_path(program_name);
+    if(tmp != NULL) {
+        g_free(tmp);
+        result = TRUE;
+    }
+    
+    return result;
+}
+
+// check if update programs are available
+void check_update_programs()
+{
+    is_update_desktop_available = check_for_program("update-desktop-database");
+    is_update_mime_available = check_for_program("update-mime-database");
+    is_gtk_update_icon_cache_available = check_for_program("gtk-update-icon-cache");
 }
 
 /* Recursively process the files in this directory and its subdirectories,
@@ -116,12 +216,10 @@ void initially_register(const char *name, int level)
     if (!(dir = opendir(name))) {
         if (verbose) {
             if (errno == EACCES) {
-                g_print("_________________________\n");
-                g_print("Permission denied on dir '%s'\n", name);
+                THREADSAFE_G_PRINT("_________________________\nPermission denied on dir '%s'\n", name);
             }
             else {
-                g_print("_________________________\n");
-                g_print("Failed to open dir '%s'\n", name);
+                THREADSAFE_G_PRINT("_________________________\nFailed to open dir '%s'\n", name);
             }
         }
         closedir(dir);
@@ -130,8 +228,7 @@ void initially_register(const char *name, int level)
 
     if (!(entry = readdir(dir))) {
         if (verbose) {
-            g_print("_________________________\n");
-            g_print("Invalid directory stream descriptor '%s'\n", name);
+            THREADSAFE_G_PRINT("_________________________\nInvalid directory stream descriptor '%s'\n", name);
         }
         closedir(dir);
         return;
@@ -222,7 +319,6 @@ void handle_event(struct inotify_event *event)
 }
 
 int main(int argc, char ** argv) {
-
     GError *error = NULL;
     GOptionContext *context;
 
@@ -319,6 +415,20 @@ int main(int argc, char ** argv) {
             notify(title, body, 15);
             exit(1);
         }
+    }
+    
+    // check which update programs are available.
+    check_update_programs();
+    
+    // set the time
+    time_last_update = g_get_real_time ();
+    time_last_change = time_last_update;
+    
+    // launch the update thread
+    pthread_t update_thread;
+    if(pthread_create(&update_thread, NULL, thread_update_desktop, NULL) != 0) {
+        g_print("Failed to create update thread.");
+        exit(1);
     }
 
     add_dir_to_watch(user_bin_dir);
