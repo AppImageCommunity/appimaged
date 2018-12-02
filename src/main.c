@@ -206,10 +206,10 @@ gboolean check_for_program(const gchar *program_name)
 // check if update programs are available
 void check_update_programs()
 {
-    is_update_desktop_available = check_for_program("update-desktop-database");
-    is_update_mime_available = check_for_program("update-mime-database");
-    is_gtk_update_icon_cache_available = check_for_program("gtk-update-icon-cache");
-    is_kbuildsycoca5_available = check_for_program("kbuildsycoca5");
+    is_update_desktop_available = check_for_program(program_update_desktop);
+    is_update_mime_available = check_for_program(program_update_mime);
+    is_gtk_update_icon_cache_available = check_for_program(program_gtk_update_icon_cache);
+    is_kbuildsycoca5_available = check_for_program(program_kbuildsycoca5);
 }
 
 /* Recursively process the files in this directory and its subdirectories,
