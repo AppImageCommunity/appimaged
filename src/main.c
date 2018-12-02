@@ -144,11 +144,18 @@ void update_desktop_set_dirty()
     g_mutex_unlock(&time_mutex);
 }
 
+bool is_appimage(char *path, gboolean verbose)
+{
+    return appimage_get_type(path, verbose) != -1;
+}
+
 void *thread_appimage_register_in_system(void *arguments)
 {
     struct arg_struct *args = arguments;
-    appimage_register_in_system(args->path, args->verbose);
-    update_desktop_set_dirty();
+    if(is_appimage(args->path, args->verbose) && !appimage_is_registered_in_system(args->path)) {
+        appimage_register_in_system(args->path, args->verbose);
+        update_desktop_set_dirty();
+    }
     pthread_exit(NULL);
 }
 
