@@ -75,12 +75,15 @@ static gint64 time_last_update = 0; // in microseconds
 static const gchar *program_update_desktop = "update-desktop-database";
 static const gchar *program_update_mime = "update-mime-database";
 static const gchar *program_gtk_update_icon_cache = "gtk-update-icon-cache";
+static const gchar *program_kbuildsycoca5 = "kbuildsycoca5";
 static const gchar *cmd_update_desktop = "update-desktop-database ~/.local/share/applications/";
 static const gchar *cmd_update_mime = "update-mime-database ~/.local/share/mime/";
 static const gchar *cmd_gtk_update_icon_cache = "gtk-update-icon-cache ~/.local/share/icons/hicolor/ -t";
+static const gchar *cmd_kbuildsycoca5 = "kbuildsycoca5";
 static gboolean is_update_desktop_available = FALSE;
 static gboolean is_update_mime_available = FALSE;
 static gboolean is_gtk_update_icon_cache_available = FALSE;
+static gboolean is_kbuildsycoca5_available = FALSE;
 gchar **remaining_args = NULL;
 
 static GOptionEntry entries[] =
@@ -122,6 +125,9 @@ void update_desktop()
     }
     if(is_gtk_update_icon_cache_available && system(cmd_gtk_update_icon_cache) != 0) {
         THREADSAFE_G_PRINT(error_msgfmt, program_gtk_update_icon_cache);
+    }
+    if(is_kbuildsycoca5_available && system(cmd_kbuildsycoca5) != 0) {
+        THREADSAFE_G_PRINT(error_msgfmt, program_kbuildsycoca5);
     }
 }
 
@@ -203,6 +209,7 @@ void check_update_programs()
     is_update_desktop_available = check_for_program("update-desktop-database");
     is_update_mime_available = check_for_program("update-mime-database");
     is_gtk_update_icon_cache_available = check_for_program("gtk-update-icon-cache");
+    is_kbuildsycoca5_available = check_for_program("kbuildsycoca5");
 }
 
 /* Recursively process the files in this directory and its subdirectories,
