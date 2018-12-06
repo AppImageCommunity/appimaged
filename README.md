@@ -36,14 +36,9 @@ appimaged will register the AppImages in with your system from the following pla
 * $HOME/bin
 * $HOME/Applications
 * /Applications
-* /isodevice/Applications
-* /isofrom/Applications
-* /run/initramfs/isoscan/Applications
-* /run/archiso/img_dev/Applications
-* /lib/live/mount/findiso/Applications
+* <any mounted partition>/Applications
 * /opt
 * /usr/local/bin
-
 
 ## Usage
 
