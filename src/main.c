@@ -44,6 +44,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <mntent.h>
 
 #include <inotifytools/inotifytools.h>
 #include <inotifytools/inotify.h>
@@ -278,13 +279,13 @@ void initially_register(const char *name, int level)
 
 void add_dir_to_watch(const char *directory)
 {
-    if (g_file_test (directory, G_FILE_TEST_IS_DIR)){
+    if (directory != NULL && g_file_test (directory, G_FILE_TEST_IS_DIR)){
         if(!inotifytools_watch_file(directory, WR_EVENTS) ) {
             fprintf(stderr, "%s: %s\n", directory, strerror(inotifytools_error()));
             exit(1);
-
         }
         initially_register(directory, 0);
+        THREADSAFE_G_PRINT("Watching %s\n", directory);
     }
 }
 
@@ -441,7 +442,7 @@ int main(int argc, char ** argv) {
     // launch the update thread
     pthread_t update_thread;
     if(pthread_create(&update_thread, NULL, thread_update_desktop, NULL) != 0) {
-        g_print("Failed to create update thread.");
+        THREADSAFE_G_PRINT("Failed to create update thread.");
         exit(1);
     }
 
@@ -451,18 +452,32 @@ int main(int argc, char ** argv) {
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/.bin", NULL));
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Applications", NULL));
     add_dir_to_watch(g_build_filename("/Applications", NULL));
-    // Perhaps we should determine the following dynamically using something like
-    // mount | grep -i iso | head -n 1 | cut -d ' ' -f 3
-    add_dir_to_watch(g_build_filename("/isodevice/Applications", NULL)); // Ubuntu Live media
-    add_dir_to_watch(g_build_filename("/isofrom/Applications", NULL)); // Older openSUSE Live media
-    add_dir_to_watch(g_build_filename("/run/initramfs/isoscan/Applications", NULL)); // Newer openSUSE Live media
-    add_dir_to_watch(g_build_filename("/run/archiso/img_dev/Applications", NULL)); // Antergos Live media
-    add_dir_to_watch(g_build_filename("/lib/live/mount/findiso/Applications", NULL)); // Manjaro Live media
     add_dir_to_watch(g_build_filename("/opt", NULL));
     add_dir_to_watch(g_build_filename("/usr/local/bin", NULL));
+    
+    // Watch "/Applications" on all mounted partitions, if it exists.
+    // TODO: Notice when partitions are mounted and unmounted (patches welcome!)
+    struct mntent *ent;
+    FILE *aFile;
+    aFile = setmntent("/proc/mounts", "r");
+    if(aFile == NULL) {
+        perror("setmntent");
+        exit(1);
+    }
+    while(NULL != (ent = getmntent(aFile))) {
+        gchar *applicationsdir = NULL;
+        applicationsdir = g_build_filename(ent->mnt_dir, "Applications", NULL);
+        if(applicationsdir != NULL) {
+            if(g_file_test (applicationsdir, G_FILE_TEST_IS_DIR) ){
+            add_dir_to_watch(applicationsdir);
+            }
+        }
+        g_free(applicationsdir);
+    }
+    endmntent(aFile);
 
     struct inotify_event * event = inotifytools_next_event(-1);
-    while (event) {
+    while(event) {
         if(verbose){
             inotifytools_printf(event, "%w%f %e\n");
         }
