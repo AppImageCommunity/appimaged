@@ -87,6 +87,7 @@ You can build appimaged as follows:
 sudo apt install git cmake make g++ autoconf libtool pkg-config libglib2.0-dev libcairo2-dev libfuse-dev
 git clone --recursive https://github.com/AppImage/appimaged/
 cd appimaged/
+git submodule update --init --recursive
 mkdir build/
 cd build/
 cmake ..
