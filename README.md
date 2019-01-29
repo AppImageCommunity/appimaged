@@ -36,7 +36,7 @@ appimaged will register the AppImages in with your system from the following pla
 * $HOME/bin
 * $HOME/Applications
 * /Applications
-* <any mounted partition>/Applications
+* [any mounted partition]/Applications
 * /opt
 * /usr/local/bin
 
