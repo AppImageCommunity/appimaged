@@ -71,7 +71,7 @@ Download AppImageUpdate from https://github.com/AppImage/AppImageUpdate/releases
 
 ```
 sudo mv "Downloads/AppImageUpdate-*.AppImage" /usr/local/bin/AppImageUpdate
-chmod a+x /usr/local/bin/AppImageUpdate
+sudo chmod a+x /usr/local/bin/AppImageUpdate
 ```
 
 
