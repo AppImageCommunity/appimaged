@@ -150,12 +150,84 @@ bool is_appimage(char *path, gboolean verbose)
     return appimage_get_type(path, verbose) != -1;
 }
 
-void *thread_appimage_register_in_system(void *arguments)
-{
-    struct arg_struct *args = arguments;
-    if(is_appimage(args->path, args->verbose) && !appimage_is_registered_in_system(args->path)) {
-        appimage_register_in_system(args->path, args->verbose);
-        update_desktop_set_dirty();
+
+GKeyFile* load_desktop_entry(const char* desktop_file_path) {
+    GKeyFile* key_file_structure = g_key_file_new();
+    gboolean success = g_key_file_load_from_file(key_file_structure, desktop_file_path,
+                                                 G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
+
+    if (!success) {
+        // Don't remove the brackets or the macro will segfault
+        THREADSAFE_G_PRINT("Failed to load the deployed desktop entry, '%s'\n", "a");
+    }
+
+    return key_file_structure;
+}
+
+void setup_firejail_on_desktop_entry(GKeyFile* key_file_structure) {
+    char* oldExecValue = g_key_file_get_value(key_file_structure,
+                                              G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, NULL);
+
+    char* firejail_exec = g_strdup_printf("firejail --env=DESKTOPINTEGRATION=appimaged --noprofile --appimage %s",
+                                    oldExecValue);
+    g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, firejail_exec);
+
+    gchar* firejail_profile_group = "Desktop Action FirejailProfile";
+    gchar* firejail_profile_exec = g_strdup_printf(
+        "firejail --env=DESKTOPINTEGRATION=appimaged --private --appimage %s", oldExecValue);
+    gchar* firejail_tryexec = "firejail";
+    g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_NAME,
+                         "Run without sandbox profile");
+    g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_EXEC,
+                         firejail_profile_exec);
+    g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC,
+                         firejail_tryexec);
+    g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "Actions", "FirejailProfile;");
+
+    g_free(firejail_profile_exec);
+    g_free(oldExecValue);
+    g_free(firejail_exec);
+}
+
+void save_desktop_entry(GKeyFile* key_file_structure, const char* desktop_file_path) {
+    gboolean success = g_key_file_save_to_file(key_file_structure, desktop_file_path, NULL);
+
+    if (!success) {
+        // Don't remove the brackets or the macro will segfault
+        THREADSAFE_G_PRINT("Failed to save the deployed desktop entry\n");
+    }
+}
+
+
+void enable_firejail_if_available(const char* appimage_path) {
+    /* If firejail is on the $PATH, then use it to run AppImages */
+    char* firejail_paht = g_find_program_in_path("firejail");
+    if (firejail_paht) {
+        const char* desktop_file_path = appimage_registered_desktop_file_path(appimage_path, NULL, false);
+
+        if (desktop_file_path != NULL && g_file_test(desktop_file_path, G_FILE_TEST_EXISTS)) {
+            GKeyFile* key_file_structure = load_desktop_entry(desktop_file_path);
+
+            setup_firejail_on_desktop_entry(key_file_structure);
+            save_desktop_entry(key_file_structure, desktop_file_path);
+
+            g_key_file_unref(key_file_structure);
+            g_free(firejail_paht);
+        }
+
+        g_free(desktop_file_path);
+    }
+}
+
+void* thread_appimage_register_in_system(void* arguments) {
+    struct arg_struct* args = arguments;
+    if (is_appimage(args->path, args->verbose) && !appimage_is_registered_in_system(args->path)) {
+        int failed = appimage_register_in_system(args->path, args->verbose);
+
+        if (!failed) {
+            enable_firejail_if_available(args->path);
+            update_desktop_set_dirty();
+        }
     }
     pthread_exit(NULL);
 }
