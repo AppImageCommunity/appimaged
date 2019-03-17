@@ -435,13 +435,14 @@ int main(int argc, char ** argv) {
 
     gchar *user_bin_dir = g_build_filename(g_get_home_dir(), "/.local/bin", NULL);
     gchar *installed_appimaged_location = g_build_filename(user_bin_dir, "appimaged", NULL);
-    const gchar *appimage_location = g_getenv("APPIMAGE");
+    gchar *appimage_location = g_strdup(g_getenv("APPIMAGE"));
     gchar *own_desktop_file_location = g_build_filename(g_getenv("APPDIR"), "/appimaged.desktop", NULL);
     gchar *global_autostart_file = "/etc/xdg/autostart/appimaged.desktop";
     gchar *global_systemd_file = "/usr/lib/systemd/user/appimaged.service";
     gchar *partial_path = g_strdup_printf("autostart/appimagekit-appimaged.desktop");
     char* config_home = xdg_config_home();
     gchar *destination = g_build_filename(config_home, partial_path, NULL);
+    gchar *watch_dirs = g_strdup(g_getenv("APPIMAGED_WATCH_DIRS"));
     free(config_home);
 
     if(uninstall){
@@ -503,6 +504,8 @@ int main(int argc, char ** argv) {
             exit(1);
         }
     }
+
+    g_free(appimage_location);
     
     // check which update programs are available.
     check_update_programs();
@@ -518,35 +521,48 @@ int main(int argc, char ** argv) {
         exit(1);
     }
 
-    add_dir_to_watch(user_bin_dir);
-    add_dir_to_watch(g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
-    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/bin", NULL));
-    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/.bin", NULL));
-    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Applications", NULL));
-    add_dir_to_watch(g_build_filename("/Applications", NULL));
-    add_dir_to_watch(g_build_filename("/opt", NULL));
-    add_dir_to_watch(g_build_filename("/usr/local/bin", NULL));
-    
-    // Watch "/Applications" on all mounted partitions, if it exists.
-    // TODO: Notice when partitions are mounted and unmounted (patches welcome!)
-    struct mntent *ent;
-    FILE *aFile;
-    aFile = setmntent("/proc/mounts", "r");
-    if(aFile == NULL) {
-        perror("setmntent");
-        exit(1);
-    }
-    while(NULL != (ent = getmntent(aFile))) {
-        gchar *applicationsdir = NULL;
-        applicationsdir = g_build_filename(ent->mnt_dir, "Applications", NULL);
-        if(applicationsdir != NULL) {
-            if(g_file_test (applicationsdir, G_FILE_TEST_IS_DIR) ){
-            add_dir_to_watch(applicationsdir);
-            }
+    // Specify directories to watch with the APPIMAGED_WATCH_DIRS environment
+    // variable. Directories are seperated with a colon (:), like in PATH. If
+    // the environment variable is not set, appimaged reverts to prior behavior.
+    if (watch_dirs) {
+        gchar **dirs = g_strsplit(watch_dirs, ":", -1);
+        int i;
+        for (i = 0; dirs[i]; ++i) {
+            add_dir_to_watch(g_build_filename(dirs[i], NULL));
         }
-        g_free(applicationsdir);
+        g_strfreev(dirs);
+        g_free(watch_dirs);
+    } else {
+        add_dir_to_watch(user_bin_dir);
+        add_dir_to_watch(g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
+        add_dir_to_watch(g_build_filename(g_get_home_dir(), "/bin", NULL));
+        add_dir_to_watch(g_build_filename(g_get_home_dir(), "/.bin", NULL));
+        add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Applications", NULL));
+        add_dir_to_watch(g_build_filename("/Applications", NULL));
+        add_dir_to_watch(g_build_filename("/opt", NULL));
+        add_dir_to_watch(g_build_filename("/usr/local/bin", NULL));
+    
+        // Watch "/Applications" on all mounted partitions, if it exists.
+        // TODO: Notice when partitions are mounted and unmounted (patches welcome!)
+        struct mntent *ent;
+        FILE *aFile;
+        aFile = setmntent("/proc/mounts", "r");
+        if(aFile == NULL) {
+            perror("setmntent");
+            exit(1);
+        }
+        while(NULL != (ent = getmntent(aFile))) {
+            gchar *applicationsdir = NULL;
+            applicationsdir = g_build_filename(ent->mnt_dir, "Applications", NULL);
+            if(applicationsdir != NULL) {
+                if(g_file_test (applicationsdir, G_FILE_TEST_IS_DIR) ){
+                add_dir_to_watch(applicationsdir);
+                }
+            }
+            g_free(applicationsdir);
+        }
+        endmntent(aFile);
     }
-    endmntent(aFile);
 
     struct inotify_event * event = inotifytools_next_event(-1);
     while(event) {
