@@ -64,6 +64,17 @@ cpack -V -G RPM
 mkdir -p appdir
 make install DESTDIR=appdir
 
+# Add "hidden" dependencies; https://github.com/AppImage/libappimage/issues/104
+We want a newer patchelf since the one above is missing e.g., '--add-needed' which our users might want to use
+git clone -o e1e39f3 https://github.com/NixOS/patchelf
+cd patchelf
+bash ./bootstrap.sh
+./configure --prefix=/usr
+make -j$(nproc)
+sudo make install
+cd -
+patchelf --add-needed librsvg-2.so.2 --add-needed libcairo.so.2 --add-needed libgobject-2.0.so ./appdir/usr/bin/appimaged
+
 wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-"$ARCH".AppImage
 chmod +x linuxdeploy-"$ARCH".AppImage
 ./linuxdeploy-"$ARCH".AppImage --appimage-extract
