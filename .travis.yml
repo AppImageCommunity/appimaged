@@ -39,6 +39,7 @@ matrix:
             - rpm
 
 script:
+  - ( cd appimaged/lib/ ; git checkout master ) # https://github.com/AppImage/appimaged/issues/80#issuecomment-489764083
   - bash -xe travis/travis-build.sh
 
 after_success:
