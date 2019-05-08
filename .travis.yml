@@ -39,7 +39,7 @@ matrix:
             - rpm
 
 script:
-  - ( mkdir -p ./lib ; cd ./lib/ ; git clone https://github.com/AppImage/libappimage )
+  - ( mkdir -p ./lib ; cd ./lib/ ; git clone --recursive https://github.com/AppImage/libappimage )
   - bash -xe travis/travis-build.sh
 
 after_success:
