@@ -39,7 +39,7 @@ matrix:
             - rpm
 
 script:
-  - ( cd lib/libappimage ; git checkout master ) # https://github.com/AppImage/appimaged/issues/80#issuecomment-489764083
+  - bash -xe travis/check_latest_libappimage_tag.sh
   - bash -xe travis/travis-build.sh
 
 after_success:
