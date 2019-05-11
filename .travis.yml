@@ -39,7 +39,7 @@ matrix:
             - rpm
 
 script:
-  - bash -xe travis/check_latest_libappimage_tag.sh
+  - ( mkdir -p ./lib ; cd ./lib/ ; git clone --recursive https://github.com/AppImage/libappimage )
   - bash -xe travis/travis-build.sh
 
 after_success:
