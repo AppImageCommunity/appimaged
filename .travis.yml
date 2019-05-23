@@ -16,15 +16,14 @@ matrix:
             - libbsd-dev
             - libcairo-dev
             - rpm
+            - librsvg2-dev
     - env: ARCH=i386
       addons:
         apt:
-          update: true
           packages:
             - gcc-multilib
             - g++-multilib
             - libfuse2:i386
-            - librsvg2-bin:i386
             - libfuse-dev:i386
             - desktop-file-utils
             - ccache
@@ -33,10 +32,17 @@ matrix:
             - liblzma-dev:i386
             - libgtest-dev
             - libcairo2-dev:i386
-            - libpng-dev:i386
+            - librsvg2-bin:i386
+            - librsvg2-dev:i386
             - libfreetype6-dev:i386
             - libfontconfig1-dev:i386
             - rpm
+            - gir1.2-rsvg-2.0:i386
+            - libgdk-pixbuf2.0-dev:i386
+            - gir1.2-freedesktop:i386
+            - gir1.2-gdkpixbuf-2.0:i386
+            - gir1.2-glib-2.0:i386
+            - libgirepository-1.0-1:i386
 
 script:
   - ( mkdir -p ./lib ; cd ./lib/ ; git clone --recursive https://github.com/AppImage/libappimage )
