@@ -64,29 +64,6 @@ cpack -V -G RPM
 mkdir -p appdir
 make install DESTDIR=appdir
 
-# Add "hidden" dependencies; https://github.com/AppImage/libappimage/issues/104
-# We need a newer patchelf with '--add-needed'
-git clone -o e1e39f3 https://github.com/NixOS/patchelf
-cd patchelf
-bash ./bootstrap.sh
-./configure --prefix=/usr
-make -j$(nproc)
-sudo make install
-cd -
-patchelf --add-needed librsvg-2.so.2 --add-needed libcairo.so.2 --add-needed libgobject-2.0.so ./appdir/usr/bin/appimaged
-
-# Workaround for:
-# undefined symbol: g_type_check_instance_is_fundamentally_a
-# Function g_type_check_instance_is_fundamentally_a was introduced in glib2-2.41.1
-# Bundle libglib-2.0.so.0 - TODO: find a better solution, e.g., downgrade libglib-2.0 at compile time
-mkdir -p ./appdir/usr/lib/
-cp $(ldconfig -p | grep libglib-2.0.so.0 | head -n 1 | cut -d ">" -f 2 | xargs) ./appdir/usr/lib/
-# The following come with glib2 and probably need to be treated together:
-cp $(ldconfig -p | grep libgio-2.0.so.0 | head -n 1 | cut -d ">" -f 2 | xargs) ./appdir/usr/lib/
-cp $(ldconfig -p | grep libgmodule-2.0.so.0 | head -n 1 | cut -d ">" -f 2 | xargs) ./appdir/usr/lib/
-cp $(ldconfig -p | grep libgobject-2.0.so.0 | head -n 1 | cut -d ">" -f 2 | xargs) ./appdir/usr/lib/
-cp $(ldconfig -p | grep libgthread-2.0.so.0 | head -n 1 | cut -d ">" -f 2 | xargs) ./appdir/usr/lib/
-
 wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-"$ARCH".AppImage
 chmod +x linuxdeploy-"$ARCH".AppImage
 ./linuxdeploy-"$ARCH".AppImage --appimage-extract
