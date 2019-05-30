@@ -27,6 +27,19 @@ else()
     set(CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}~local")
 endif()
 
+# Exclude well known paths or file crash will be reported at the moment of installing
+set(
+    CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
+    /usr/share/icons
+    /usr/share/icons/hicolor
+    /usr/share/icons/hicolor/scalable
+    /usr/share/icons/hicolor/scalable/apps
+    /usr/share/applications
+    /usr/share/metainfo
+    /usr/lib/systemd
+    /usr/lib/systemd/user
+)
+
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 
