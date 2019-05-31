@@ -27,6 +27,19 @@ else()
     set(CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}~local")
 endif()
 
+# Exclude well known paths or file crash will be reported at the moment of installing
+set(
+    CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
+    /usr/share/icons
+    /usr/share/icons/hicolor
+    /usr/share/icons/hicolor/scalable
+    /usr/share/icons/hicolor/scalable/apps
+    /usr/share/applications
+    /usr/share/metainfo
+    /usr/lib/systemd
+    /usr/lib/systemd/user
+)
+
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 
@@ -34,7 +47,7 @@ set(CPACK_RPM_PACKAGE_NAME "appimaged")
 set(CPACK_RPM_PACKAGE_SUMMARY
     "Optional AppImage daemon for desktop integration. Integrates AppImages into the desktop, e.g., installs icons and menu entries.")
 
-set(CPACK_RPM_PACKAGE_REQUIRES "libarchive13, libc6 >= 2.4, libglib2.0-0, zlib1g, fuse")
+set(CPACK_RPM_PACKAGE_REQUIRES "libarchive, glib2, fuse")
 
 set(CPACK_COMPONENTS_ALL appimaged)
 set(CPACK_RPM_COMPONENT_INSTALL ON)
