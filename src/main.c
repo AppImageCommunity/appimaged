@@ -74,17 +74,17 @@ static const gint64 time_update_interval = 3 * 1000000; // 3 seconds (in microse
 static gint64 time_last_change = 0; // in microseconds
 static gint64 time_last_update = 0; // in microseconds
 static const gchar* program_update_desktop = "update-desktop-database";
+static const gchar* program_plasma_changeicons = "plasma-changeicons";
 static const gchar* program_update_mime = "update-mime-database";
 static const gchar* program_gtk_update_icon_cache = "gtk-update-icon-cache";
-static const gchar* program_kbuildsycoca5 = "kbuildsycoca5";
 static const gchar* cmd_update_desktop = "update-desktop-database ~/.local/share/applications/";
 static const gchar* cmd_update_mime = "update-mime-database ~/.local/share/mime/";
 static const gchar* cmd_gtk_update_icon_cache = "gtk-update-icon-cache ~/.local/share/icons/hicolor/ -t";
-static const gchar* cmd_kbuildsycoca5 = "kbuildsycoca5";
+static gchar* cmd_plasma_changeicons = 0;
 static gboolean is_update_desktop_available = FALSE;
 static gboolean is_update_mime_available = FALSE;
 static gboolean is_gtk_update_icon_cache_available = FALSE;
-static gboolean is_kbuildsycoca5_available = FALSE;
+static gboolean is_plasma_changeicons_available = FALSE;
 gchar** remaining_args = NULL;
 
 static GOptionEntry entries[] =
@@ -115,6 +115,17 @@ struct arg_struct {
     gboolean verbose;
 };
 
+void run_plasma_changeicons() {
+    char* full_cmd_plasma_changeicons = g_strconcat(cmd_plasma_changeicons,
+                                                    " `cat $HOME/.config/kdeglobals | grep Theme | cut -f2 -d=`", NULL);
+
+    if (system(full_cmd_plasma_changeicons) != 0) {
+        THREADSAFE_G_PRINT("Warning: %s retuned non-zero exit code:\n", full_cmd_plasma_changeicons);
+    }
+
+    g_free(full_cmd_plasma_changeicons);
+}
+
 void update_desktop() {
     const gchar* error_msgfmt = "Warning: %s retuned non-zero exit code:\n";
     if (is_update_desktop_available && system(cmd_update_desktop) != 0) {
@@ -126,8 +137,8 @@ void update_desktop() {
     if (is_gtk_update_icon_cache_available && system(cmd_gtk_update_icon_cache) != 0) {
         THREADSAFE_G_PRINT(error_msgfmt, program_gtk_update_icon_cache);
     }
-    if (is_kbuildsycoca5_available && system(cmd_kbuildsycoca5) != 0) {
-        THREADSAFE_G_PRINT(error_msgfmt, program_kbuildsycoca5);
+    if (is_plasma_changeicons_available) {
+        run_plasma_changeicons();
     }
 }
 
@@ -300,12 +311,30 @@ gboolean check_for_program(const gchar* program_name) {
     return result;
 }
 
+gboolean check_for_plasma_changeicons() {
+    // plasma-changeicons is installed by default on libexec this will include the most common paths to allow
+    // g_find_program_in_path to work. It would be nice to have more accurate way of knowing the libexec dir path.
+    const char* path = g_getenv("PATH");
+    char* new_path = g_strconcat(path, ":/usr/lib/libexec:/usr/lib/x86_64-linux-gnu/libexec/"
+                                       ":/usr/lib/i386-linux-gnu/libexec/", NULL);
+    g_setenv("PATH", new_path, true);
+    g_free(new_path);
+
+    cmd_plasma_changeicons = g_find_program_in_path(program_plasma_changeicons);
+    if (cmd_plasma_changeicons != NULL) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 // check if update programs are available
 void check_update_programs() {
+
     is_update_desktop_available = check_for_program(program_update_desktop);
     is_update_mime_available = check_for_program(program_update_mime);
     is_gtk_update_icon_cache_available = check_for_program(program_gtk_update_icon_cache);
-    is_kbuildsycoca5_available = check_for_program(program_kbuildsycoca5);
+    is_plasma_changeicons_available = check_for_plasma_changeicons();
 }
 
 /* Recursively process the files in this directory and its subdirectories,
