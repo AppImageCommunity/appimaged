@@ -525,6 +525,9 @@ int main(int argc, char** argv) {
 
     // check which update programs are available.
     check_update_programs();
+    
+    // Workaround for: Directory '/home/me/.local/share/mime/packages' does not exist! # https://github.com/AppImage/appimaged/issues/93
+    g_mkdir_with_parents(g_build_filename(g_get_home_dir(), ".local/share/mime/packages", NULL), 0755);
 
     // set the time
     time_last_update = g_get_real_time();
