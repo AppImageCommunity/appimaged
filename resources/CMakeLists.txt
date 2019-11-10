@@ -13,8 +13,8 @@ install(
 )
 
 install(
-    FILES ${CMAKE_CURRENT_SOURCE_DIR}/appimaged.svg
-    DESTINATION share/icons/hicolor/scalable/apps
+    FILES ${CMAKE_CURRENT_SOURCE_DIR}/appimaged.png
+    DESTINATION share/icons/hicolor/128x128/apps
     COMPONENT appimaged
 )
 
