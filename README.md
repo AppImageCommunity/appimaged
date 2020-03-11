@@ -85,9 +85,9 @@ You can build appimaged as follows:
 # Optional if your CMake is not recent enough
 # wget https://github.com/Kitware/CMake/releases/download/v3.12.4/cmake-3.12.4-Linux-x86_64.tar.gz -O - | sudo tar -xz -C /usr/local --strip-components=1
 sudo apt install git cmake make g++ autoconf libtool pkg-config libglib2.0-dev libcairo2-dev libfuse-dev
-git clone --recursive https://github.com/AppImage/appimaged/
+git clone https://github.com/AppImage/appimaged/
+git clone --recursive https://github.com/AppImage/libappimage/ appimaged/lib/libappimage
 cd appimaged/
-git submodule update --init --recursive
 mkdir build/
 cd build/
 cmake ..
