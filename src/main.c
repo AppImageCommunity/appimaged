@@ -363,13 +363,31 @@ void initially_register(const char* name, int level) {
 }
 
 void add_dir_to_watch(const char* directory) {
-    if (directory != NULL && g_file_test(directory, G_FILE_TEST_IS_DIR)) {
-        if (!inotifytools_watch_file(directory, WR_EVENTS)) {
-            fprintf(stderr, "%s: %s\n", directory, strerror(inotifytools_error()));
+    GError* err = NULL;
+
+    // XXX: Fails silently if file doesn’t exist.  Maybe log?
+    if (NULL == directory || g_file_test(directory, G_FILE_TEST_EXISTS)) {
+        return;
+    }
+
+    // Follow symlinks.
+    const char* realdir = g_file_test(directory, G_FILE_TEST_IS_SYMLINK)
+      ? g_file_read_link(directory, &err)
+      : directory;
+
+    if (NULL != err) {
+        THREADSAFE_G_PRINT("Error #%d following symlink %s: %s\n",
+                           err->code, directory, err->message);
+        return;
+    }
+
+    if (g_file_test(realdir, G_FILE_TEST_IS_DIR)) {
+        if (!inotifytools_watch_file(realdir, WR_EVENTS)) {
+            fprintf(stderr, "%s: %s\n", realdir, strerror(inotifytools_error()));
             exit(1);
         }
-        initially_register(directory, 0);
-        THREADSAFE_G_PRINT("Watching %s\n", directory);
+        initially_register(realdir, 0);
+        THREADSAFE_G_PRINT("Watching %s\n", realdir);
     }
 }
 
