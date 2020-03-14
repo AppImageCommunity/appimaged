@@ -366,7 +366,7 @@ void add_dir_to_watch(const char* directory) {
     GError* err = NULL;
 
     // XXX: Fails silently if file doesn’t exist.  Maybe log?
-    if (NULL == directory || g_file_test(directory, G_FILE_TEST_EXISTS)) {
+    if (NULL == directory || !g_file_test(directory, G_FILE_TEST_EXISTS)) {
         return;
     }
 
