@@ -34,6 +34,8 @@ set(
     /usr/share/icons/hicolor
     /usr/share/icons/hicolor/scalable
     /usr/share/icons/hicolor/scalable/apps
+    /usr/share/icons/hicolor/128x128
+    /usr/share/icons/hicolor/128x128/apps
     /usr/share/applications
     /usr/share/metainfo
     /usr/lib/systemd
